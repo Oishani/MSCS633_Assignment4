@@ -1,6 +1,7 @@
 """
 This script:
-  1. Downloads the anonymized credit card transactions dataset via kagglehub.
+  1. Loads the anonymized credit card transactions dataset from creditcard.csv
+     (included in the repository).
   2. Performs exploratory data analysis (EDA) and preprocessing.
   3. Trains a PyOD AutoEncoder model to detect fraudulent transactions.
   4. Evaluates the model with multiple metrics and visualisations.
@@ -11,10 +12,10 @@ Dataset  : https://www.kaggle.com/datasets/whenamancodes/fraud-detection
 
 # ── Standard library ────────────────────────────────────────────────────────
 import os
+import sys
 import warnings
 
 # ── Third-party ─────────────────────────────────────────────────────────────
-import kagglehub
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,11 +38,12 @@ from pyod.models.auto_encoder import AutoEncoder
 warnings.filterwarnings("ignore")
 
 # ── Global settings ──────────────────────────────────────────────────────────
-RANDOM_STATE = 42
-CONTAMINATION = 0.001  # ~0.1 % fraud rate mirrors the dataset imbalance
-FIGURES_DIR = "figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
+RANDOM_STATE  = 42
+CONTAMINATION = 0.001   # ~0.1 % fraud rate mirrors the dataset imbalance
+FIGURES_DIR   = "figures"
+DATASET_CSV   = "creditcard.csv"   # bundled with the repository
 
+os.makedirs(FIGURES_DIR, exist_ok=True)
 np.random.seed(RANDOM_STATE)
 
 
@@ -49,29 +51,32 @@ np.random.seed(RANDOM_STATE)
 # 1. DATA ACQUISITION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def download_dataset() -> pd.DataFrame:
-    """Download the Kaggle fraud-detection dataset and return it as a DataFrame."""
+def load_dataset() -> pd.DataFrame:
+    """
+    Load the credit card fraud CSV dataset bundled with the repository.
+
+    The file `creditcard.csv` must be present in the same directory as this
+    script.  It is included in the repository and requires no download step.
+
+    Returns
+    -------
+    pd.DataFrame
+        Raw credit card transactions dataset.
+    """
     print("=" * 60)
-    print("STEP 1 – Downloading dataset from Kaggle …")
+    print("STEP 1 – Loading dataset")
     print("=" * 60)
 
-    path = kagglehub.dataset_download("whenamancodes/fraud-detection")
-    print(f"Path to dataset files: {path}")
+    if not os.path.isfile(DATASET_CSV):
+        print(
+            f"\nERROR: '{DATASET_CSV}' not found.\n"
+            f"  Expected location: {os.path.abspath(DATASET_CSV)}\n"
+            "  Make sure creditcard.csv is in the same directory as fraud_detection.py."
+        )
+        sys.exit(1)
 
-    # Locate the CSV file inside the downloaded directory
-    csv_files = [
-        os.path.join(root, f)
-        for root, _, files in os.walk(path)
-        for f in files
-        if f.endswith(".csv")
-    ]
-
-    if not csv_files:
-        raise FileNotFoundError(f"No CSV file found under: {path}")
-
-    csv_path = csv_files[0]
-    print(f"Loading: {csv_path}")
-    df = pd.read_csv(csv_path)
+    print(f"Loading: {os.path.abspath(DATASET_CSV)}")
+    df = pd.read_csv(DATASET_CSV)
     print(f"Dataset shape: {df.shape}")
     return df
 
@@ -443,8 +448,8 @@ def main() -> None:
     print("║  MSCS 633 – Assignment 4: Fraud Detection (AutoEncoder)  ║")
     print("╚" + "═" * 58 + "╝\n")
 
-    # Step 1 – Download dataset
-    df = download_dataset()
+    # Step 1 – Load dataset
+    df = load_dataset()
 
     # Step 2 – EDA
     run_eda(df)
