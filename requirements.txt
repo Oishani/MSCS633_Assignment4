@@ -1,0 +1,8 @@
+kagglehub
+pyod
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+tensorflow
