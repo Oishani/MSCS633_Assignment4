@@ -211,30 +211,29 @@ def build_autoencoder() -> AutoEncoder:
     """
     Instantiate a PyOD AutoEncoder with explicit architecture settings.
 
-    Key hyperparameters
+    PyOD 2.x uses a PyTorch backend. Key hyperparameters:
     -------------------
-    hidden_neurons  : encoder [64, 32] → bottleneck [16] → decoder [32, 64]
-    hidden_activation: ReLU activation in hidden layers
-    output_activation: Sigmoid activation at the output layer
-    loss            : Mean Squared Error – reconstruction loss
-    optimizer       : Adam
-    epochs          : 50 training epochs
-    batch_size      : 256 samples per mini-batch
-    dropout_rate    : 0.2 – regularisation to prevent over-fitting
-    contamination   : expected proportion of outliers (fraud rate)
+    hidden_neuron_list    : encoder [64, 32] – decoder is mirrored automatically
+    hidden_activation_name: ReLU activation in hidden layers
+    optimizer_name        : Adam optimiser
+    optimizer_params      : weight_decay acts as L2 regularisation
+    epoch_num             : 50 training epochs
+    batch_size            : 256 samples per mini-batch
+    dropout_rate          : 0.2 – regularisation to prevent over-fitting
+    batch_norm            : True – batch normalisation between layers
+    contamination         : expected proportion of outliers (fraud rate)
+    preprocessing         : False – we already standardised outside PyOD
     """
     model = AutoEncoder(
-        hidden_neurons=[64, 32, 32, 64],  # symmetric encoder-decoder
-        hidden_activation="relu",
-        output_activation="sigmoid",
-        loss="mse",
-        optimizer="adam",
-        epochs=50,
+        hidden_neuron_list=[64, 32],      # encoder layers; decoder is mirrored
+        hidden_activation_name="relu",
+        optimizer_name="adam",
+        optimizer_params={"weight_decay": 0.1},  # L2 regularisation
+        epoch_num=50,
         batch_size=256,
         dropout_rate=0.2,
-        l2_regularizer=0.1,
-        validation_size=0.1,
-        preprocessing=False,   # we already standardised outside PyOD
+        batch_norm=True,
+        preprocessing=False,              # already standardised outside PyOD
         verbose=1,
         random_state=RANDOM_STATE,
         contamination=CONTAMINATION,
@@ -247,11 +246,11 @@ def train_model(model: AutoEncoder, X_train: np.ndarray) -> AutoEncoder:
     print("\n" + "=" * 60)
     print("STEP 4 – Training the AutoEncoder")
     print("=" * 60)
-    print("Architecture  : 64 → 32 → [bottleneck] → 32 → 64")
-    print("Activation    : ReLU (hidden) / Sigmoid (output)")
-    print("Loss          : MSE   |  Optimizer : Adam")
-    print("Epochs        : 50    |  Batch     : 256")
-    print("Dropout       : 0.2   |  L2 reg    : 0.1")
+    print("Architecture  : 64 -> 32 -> [bottleneck] -> 32 -> 64 (mirrored)")
+    print("Activation    : ReLU (hidden)")
+    print("Optimiser     : Adam  |  L2 weight_decay : 0.1")
+    print("Epochs        : 50    |  Batch           : 256")
+    print("Dropout       : 0.2   |  Batch norm      : True")
     print("-" * 60)
 
     model.fit(X_train)
