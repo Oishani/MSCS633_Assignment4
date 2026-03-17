@@ -41,23 +41,52 @@ MSCS633_Assignment4/
 
 ---
 
-## 3. Prerequisites
+## 3. Dataset Setup
+
+The credit card fraud dataset is **not included in the repository** due to its size.
+You must download and unzip it manually before running the script.
+
+1. **Download** `creditcard.csv.zip` from the course submission / shared link
+   (or directly from
+   [Kaggle – Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)).
+2. **Unzip** the archive:
+
+   ```bash
+   unzip creditcard.csv.zip
+   ```
+
+3. **Place `creditcard.csv`** in the repository root so the directory looks like:
+
+   ```
+   MSCS633_Assignment4/
+   ├── creditcard.csv       ← required here
+   ├── fraud_detection.py
+   ├── requirements.txt
+   └── README.md
+   ```
+
+> If `creditcard.csv` is missing when you run the script, it will exit immediately
+> with a clear error message pointing you back to this section.
+
+---
+
+## 4. Prerequisites  
 
 | Requirement | Version                |
 |-------------|------------------------|
 | Python      | 3.9 – 3.11 recommended |
 | pip         | >= 22                  |
 
-> **TensorFlow note** – PyOD's `AutoEncoder` uses Keras/TensorFlow as its backend.
-> TensorFlow 2.x supports **macOS (CPU)**, **Linux**, and **Windows**.
-> Apple-Silicon (M-series) users may use `tensorflow-macos` + `tensorflow-metal`
-> instead.
+> **PyTorch note** – PyOD 2.x's `AutoEncoder` uses **PyTorch** as its backend.
+> PyTorch supports **macOS (CPU/MPS)**, **Linux**, and **Windows**.
+> Apple-Silicon (M-series) users automatically benefit from MPS acceleration
+> when `torch` detects it; no extra packages are required.
 
 ---
 
-## 4. Installation
+## 5. Installation
 
-### 4.1 Create and activate a virtual environment (recommended)
+### 5.1 Create and activate a virtual environment (recommended)
 
 ```bash
 python3 -m venv venv
@@ -65,13 +94,13 @@ source venv/bin/activate        # macOS / Linux
 # venv\Scripts\activate.bat   # Windows
 ```
 
-### 4.2 Upgrade pip
+### 5.2 Upgrade pip
 
 ```bash
 pip3 install --upgrade pip
 ```
 
-### 4.3 Install all dependencies
+### 5.3 Install all dependencies
 
 ```bash
 pip3 install -r requirements.txt
@@ -82,7 +111,8 @@ This installs:
 | Package        | Purpose                                              |
 |----------------|------------------------------------------------------|
 | `pyod`         | Outlier / anomaly detection library (AutoEncoder)    |
-| `tensorflow`   | Deep-learning backend used by PyOD's AutoEncoder     |
+| `torch`        | Deep-learning backend used by PyOD 2.x's AutoEncoder |
+| `tqdm`         | Progress-bar dependency required by PyOD             |
 | `numpy`        | Numerical computing                                  |
 | `pandas`       | Data manipulation                                    |
 | `matplotlib`   | Plotting                                             |
@@ -91,18 +121,18 @@ This installs:
 
 ---
 
-## 5. Running the Script
+## 6. Running the Script
 
 ```bash
 python3 fraud_detection.py
 ```
 
 The full pipeline takes **2 – 5 minutes** depending on hardware
-(TensorFlow training loop dominates the runtime).
+(PyTorch training loop dominates the runtime).
 
 ---
 
-## 6. Pipeline Steps
+## 7. Pipeline Steps
 
 | Step | Function              | Description                                                                   |
 |------|-----------------------|-------------------------------------------------------------------------------|
@@ -116,14 +146,14 @@ The full pipeline takes **2 – 5 minutes** depending on hardware
 
 ---
 
-## 7. Output
+## 8. Output
 
 ### Console output includes
 
 - Dataset shape, dtypes, descriptive statistics
 - Class distribution and fraud percentage
 - Missing-value counts
-- Keras training epoch log (50 epochs)
+- PyTorch training progress log (50 epochs)
 - Full classification report (precision, recall, F1 per class)
 - ROC-AUC, Average Precision, and F1 scores
 - Detailed output for each PyOD API method
